@@ -29,13 +29,18 @@
         }
 
         #topleft {background-color: #FFF67E;}
+        #topleft2 {background-color: #FFFF80;}
         #topleft:active {background-color: #FFFF80;}
         #topright {background-color: #3085C3}
+        #topright2 {background-color: #80B3FF;}
         #topright:active {background-color: #80B3FF;}
         #bottomleft {background-color: #FF0060;}
+        #bottomleft2 {background-color: #FF8080;}
         #bottomleft:active {background-color: #FF8080;}
         #bottomright {background-color: #54B435;}
+        #bottomright2 {background-color: #7ABA78;}
         #bottomright:active {background-color: #7ABA78;}
+
 
     </style>
 </head>
@@ -55,90 +60,79 @@
 
 
 <script>
-let order = [];
-let playerOrder = [];
-let turn = 0;
-let cpuDelay = 1000;
-let resetGame = true;
+        let order = [];
+        let playerOrder = [];
+        let turn = 0;
+        let resetGame = false;
+        let clickedButtons = 0;
+        let cpuDelay = 1000;
 
-function reset() {
-    order = [];
-    playerOrder = [];
-    turn = 0;
-    turnCounter.innerHTML = turn;
-    cpuDelay = 1000;
-}
-
-function start() {
-    if (resetGame) {
-        reset();
-        resetGame = false;
-        turn++;
-        turnCounter.innerHTML = turn;
-        cpuDelay = (1000 - turn * 100) + 250;
-        cpuTurn();
-    }
-}
-
-function cpuTurn() {
-    order = [];
-    console.log("\norder b4 gen: ", order);
-    for (let i = 0; i < turn; i++) {
-        order.push(Math.floor(Math.random() * 4) + 1);
-    }
-    console.log("\norder after gen: ", order);
-
-
-    let i = 0;
-
-    let interval = setInterval(function() {
-        if (i < order.length) {
-            let buttonIndex = order[i] - 1;
-            flashButton(buttonIndex);
-            i++;
-        } else {
-            clearInterval(interval);
-            playerTurn();
+        function reset() {
+            playerOrder = [];
+            order = [];
+            clickedButtons = 0;
         }
-    }, cpuDelay);
-}
 
-function playerTurn() {
-    let clickedButtons = 0;
-    let buttons = document.querySelectorAll('.btn');
-    buttons.forEach(function(button, index) {
-        button.addEventListener('click', function() {
-            playerOrder.push(index+1);
-            console.log(playerOrder);
-            console.log(order);
-            if (playerOrder[clickedButtons] === order[clickedButtons]) {
-                clickedButtons++;
-                if (clickedButtons === turn) {
-                    playerOrder = [];
-                    setTimeout(start, 1000);
-                    cpuTurn();
-                }
-            } else {
-                endGame();
+        function gameLoop() {
+            if (resetGame) {
+                console.log("Game Over!");
+                reset();
+                resetGame = false;
+                return;
             }
+            turn++;
+            turnCounter.innerHTML = "Turn: " + turn;
+            let nextButtonIndex = Math.floor(Math.random() * 4);
+            order.push(nextButtonIndex);
+            cpuTurn();
+            playerTurn();
+            playerOrder = [];
+            clickedButtons = 0;
+        }
+
+        function cpuTurn() {
+            order.forEach(function (buttonIndex, i) {
+                setTimeout(function () {
+                    console.log("Flashing button with index: " + buttonIndex);
+                    flashButton(buttonIndex);
+                }, i * cpuDelay);
+            });
+        }
+
+        function playerTurn() {
+            // Empty function for simplicity. Event listener setup is moved outside.
+        }
+
+        function flashButton(index) {
+            let button = document.querySelectorAll('.btn')[index];
+            let buttonId = button.id;
+            button.id = buttonId + '2';
+            setTimeout(function () {
+                button.id = buttonId;
+            }, 200);
+        }
+
+        document.getElementById("start").addEventListener("click", function () {
+            gameLoop();
         });
-    });
-}
 
-function flashButton(index) {
-    let button = document.querySelectorAll('.btn')[index];
-    console.log("Flashing button:", button);
-    button.click(); 
-}
+        // Add event listener to handle button clicks
+        document.querySelectorAll('.btn').forEach(button => {
+            button.addEventListener('click', function () {
+                let index = Array.from(button.parentNode.children).indexOf(button);
+                //console.log("Clicked button index:", index);
+                //console.log("Expected button index in order:", order[clickedButtons]);
 
+                if (order[clickedButtons] !== undefined && index === order[clickedButtons]) {
+                    clickedButtons++;
 
-function endGame() {
-    console.log("Game Over!");
-    resetGame = true;
-}
-
-document.getElementById("start").addEventListener("click", function() {
-    start();
-});
+                    if (clickedButtons === order.length) {
+                        setTimeout(gameLoop, 1000);
+                    }
+                } else {
+                    resetGame = true;
+                }
+            });
+        });
 
 </script>
