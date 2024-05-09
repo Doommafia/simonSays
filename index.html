@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simon Says</title>
+    <style>
+        body {
+            background-color: #18191A;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #game {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 10px;
+            height: 300px;
+            width: 300px;
+        }
+
+        .btn {
+            border: 1px solid white;
+        }
+
+        #topleft {background-color: #FFF67E;}
+        #topleft:active {background-color: #FFFF80;}
+        #topright {background-color: #3085C3}
+        #topright:active {background-color: #80B3FF;}
+        #bottomleft {background-color: #FF0060;}
+        #bottomleft:active {background-color: #FF8080;}
+        #bottomright {background-color: #54B435;}
+        #bottomright:active {background-color: #7ABA78;}
+
+    </style>
+</head>
+<body>
+    <div id="game">
+        <div id="topleft" class="btn"></div>
+        <div id="topright" class="btn"></div>
+        <div id="bottomleft" class="btn"></div>
+        <div id="bottomright" class="btn"></div>
+    </div>
+    <div id="control">
+        <p id="turnCounter">Turn: </p>
+        <button id="start">Start</button>
+    </div>
+</body>
+</html>
+
+
+<script>
+let order = [];
+let playerOrder = [];
+let turn = 0;
+let cpuDelay = 1000;
+let resetGame = true;
+
+function reset() {
+    order = [];
+    playerOrder = [];
+    turn = 0;
+    turnCounter.innerHTML = turn;
+    cpuDelay = 1000;
+}
+
+function start() {
+    if (resetGame) {
+        reset();
+        resetGame = false;
+        turn++;
+        turnCounter.innerHTML = turn;
+        cpuDelay = (1000 - turn * 100) + 250;
+        cpuTurn();
+    }
+}
+
+function cpuTurn() {
+    order = [];
+    console.log("\norder b4 gen: ", order);
+    for (let i = 0; i < turn; i++) {
+        order.push(Math.floor(Math.random() * 4) + 1);
+    }
+    console.log("\norder after gen: ", order);
+
+
+    let i = 0;
+
+    let interval = setInterval(function() {
+        if (i < order.length) {
+            let buttonIndex = order[i] - 1;
+            flashButton(buttonIndex);
+            i++;
+        } else {
+            clearInterval(interval);
+            playerTurn();
+        }
+    }, cpuDelay);
+}
+
+function playerTurn() {
+    let clickedButtons = 0;
+    let buttons = document.querySelectorAll('.btn');
+    buttons.forEach(function(button, index) {
+        button.addEventListener('click', function() {
+            playerOrder.push(index+1);
+            console.log(playerOrder);
+            console.log(order);
+            if (playerOrder[clickedButtons] === order[clickedButtons]) {
+                clickedButtons++;
+                if (clickedButtons === turn) {
+                    playerOrder = [];
+                    setTimeout(start, 1000);
+                    cpuTurn();
+                }
+            } else {
+                endGame();
+            }
+        });
+    });
+}
+
+function flashButton(index) {
+    let button = document.querySelectorAll('.btn')[index];
+    console.log("Flashing button:", button);
+    button.click(); 
+}
+
+
+function endGame() {
+    console.log("Game Over!");
+    resetGame = true;
+}
+
+document.getElementById("start").addEventListener("click", function() {
+    start();
+});
+
+</script>
