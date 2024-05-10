@@ -55,11 +55,8 @@
         <p id="turnCounter">Turn: </p>
         <button id="start">Start</button>
     </div>
-</body>
-</html>
 
-
-<script>
+    <script>
         let order = [];
         let playerOrder = [];
         let turn = 0;
@@ -85,7 +82,6 @@
             let nextButtonIndex = Math.floor(Math.random() * 4);
             order.push(nextButtonIndex);
             cpuTurn();
-            playerTurn();
             playerOrder = [];
             clickedButtons = 0;
         }
@@ -97,10 +93,6 @@
                     flashButton(buttonIndex);
                 }, i * cpuDelay);
             });
-        }
-
-        function playerTurn() {
-            // Empty function for simplicity. Event listener setup is moved outside.
         }
 
         function flashButton(index) {
@@ -116,23 +108,28 @@
             gameLoop();
         });
 
-        // Add event listener to handle button clicks
         document.querySelectorAll('.btn').forEach(button => {
             button.addEventListener('click', function () {
                 let index = Array.from(button.parentNode.children).indexOf(button);
-                //console.log("Clicked button index:", index);
-                //console.log("Expected button index in order:", order[clickedButtons]);
 
-                if (order[clickedButtons] !== undefined && index === order[clickedButtons]) {
-                    clickedButtons++;
-
-                    if (clickedButtons === order.length) {
-                        setTimeout(gameLoop, 1000);
+                if (index >= 0 && index <= 3) {
+                    if (order[clickedButtons] !== undefined && index === order[clickedButtons]) {
+                        clickedButtons++;
+                        if (clickedButtons === order.length) {
+                            setTimeout(gameLoop, 1000);
+                        }
+                    } else {
+                        alert("Game Over!");
+                        resetGame = true; 
+                        location.reload();
                     }
                 } else {
-                    resetGame = true;
+                    console.log("Invalid button index:", index);
+                    resetGame = true; 
                 }
             });
         });
 
-</script>
+    </script>
+</body>
+</html>
